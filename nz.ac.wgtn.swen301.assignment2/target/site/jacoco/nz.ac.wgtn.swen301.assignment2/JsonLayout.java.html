@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JsonLayout.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">assignment2-300589631</a> &gt; <a href="index.source.html" class="el_package">nz.ac.wgtn.swen301.assignment2</a> &gt; <span class="el_source">JsonLayout.java</span></div><h1>JsonLayout.java</h1><pre class="source lang-java linenums">package nz.ac.wgtn.swen301.assignment2;
+
+import org.apache.log4j.Layout;
+import org.apache.log4j.spi.LoggingEvent;
+import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class JsonLayout extends Layout {
+    private JSONObject json;
+<span class="fc" id="L13">    public JsonLayout(){</span>
+<span class="fc" id="L14">        json = new JSONObject();</span>
+<span class="fc" id="L15">    }</span>
+    @Override
+    public String format(LoggingEvent loggingEvent) {
+<span class="fc" id="L18">        Date d = new Date(loggingEvent.timeStamp);</span>
+<span class="fc" id="L19">        DateFormat f = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.mmm'Z'&quot;);</span>
+<span class="fc" id="L20">        json.put(&quot;name&quot;, loggingEvent.getLoggerName());</span>
+<span class="fc" id="L21">        json.put(&quot;level&quot;, loggingEvent.getLevel().toString());</span>
+<span class="fc" id="L22">        json.put(&quot;timestamp&quot;,f.format(d));</span>
+<span class="fc" id="L23">        json.put(&quot;thread&quot;, loggingEvent.getThreadName());</span>
+<span class="fc" id="L24">        json.put(&quot;message&quot;, loggingEvent.getRenderedMessage());</span>
+<span class="fc" id="L25">        return json.toString(5);</span>
+    }
+    @Override
+    public boolean ignoresThrowable() {
+<span class="fc" id="L29">        return false;</span>
+    }
+
+    @Override
+    public void activateOptions() {
+<span class="nc" id="L34">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

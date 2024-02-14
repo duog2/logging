@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MemAppender.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">assignment2-300589631</a> &gt; <a href="index.source.html" class="el_package">nz.ac.wgtn.swen301.assignment2</a> &gt; <span class="el_source">MemAppender.java</span></div><h1>MemAppender.java</h1><pre class="source lang-java linenums">package nz.ac.wgtn.swen301.assignment2;
+
+import nz.ac.wgtn.swen301.assignment2.JsonLayout;
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.spi.LoggingEvent;
+
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class MemAppender extends AppenderSkeleton implements MemAppenderMBean {
+    List&lt;LoggingEvent&gt; loggingEventList;
+    private String name;
+    private long maxSize;
+<span class="fc" id="L22">    private long DiscardLog = 0;</span>
+<span class="fc" id="L23">    public MemAppender() {</span>
+<span class="fc" id="L24">        name = null;</span>
+<span class="fc" id="L25">        maxSize = 1000;</span>
+<span class="fc" id="L26">        loggingEventList = Collections.synchronizedList(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L27">        DiscardLog = 0;</span>
+<span class="fc" id="L28">    }</span>
+    public void setName(String name) {
+<span class="fc" id="L30">        this.name = name;</span>
+<span class="fc" id="L31">    }</span>
+<span class="fc" id="L32">    public void setMaxSize(long maxSize) { this.maxSize = maxSize; }</span>
+    public String getNameAppender() {
+<span class="fc" id="L34">        return name;</span>
+    }
+    public long getMaxSize(){
+<span class="fc" id="L37">        return maxSize;</span>
+    }
+<span class="fc" id="L39">    public List&lt;LoggingEvent&gt;getCurrentLogs(){ return Collections.unmodifiableList(loggingEventList); }</span>
+<span class="fc" id="L40">    public long getLogCount() { return loggingEventList.size(); }</span>
+    public long getDiscardedLogCount(){
+<span class="fc" id="L42">        return DiscardLog;</span>
+    }
+    public String[] getLogs() {
+<span class="fc" id="L45">        String[] logs = new String[loggingEventList.size()];</span>
+<span class="fc" id="L46">        String format = PatternLayout.DEFAULT_CONVERSION_PATTERN;</span>
+<span class="fc" id="L47">        PatternLayout layout = new PatternLayout();</span>
+<span class="fc" id="L48">        layout.setConversionPattern(format);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        for (int i = 0; i &lt; loggingEventList.size(); i++) {</span>
+<span class="fc" id="L50">            LoggingEvent event = loggingEventList.get(i);</span>
+<span class="fc" id="L51">            String logString = layout.format(event);</span>
+<span class="fc" id="L52">            logs[i] = logString;</span>
+        }
+<span class="fc" id="L54">        return logs;</span>
+    }
+    @Override
+    public void append(LoggingEvent loggingEvent) {
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if(loggingEventList.size() &lt; maxSize) {</span>
+<span class="fc" id="L59">            loggingEventList.add(loggingEvent);</span>
+        }
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if(loggingEventList.size() == maxSize){</span>
+<span class="fc" id="L62">            loggingEventList.remove(loggingEventList.get(0));</span>
+<span class="fc" id="L63">            DiscardLog +=1;</span>
+        }
+<span class="fc" id="L65">    }</span>
+    @Override
+    public void exportToJSON(String Filename) {
+<span class="fc" id="L68">        try (FileWriter fileWriter = new FileWriter(Filename)){</span>
+<span class="fc" id="L69">            JsonLayout layout = new JsonLayout();</span>
+<span class="fc" id="L70">            fileWriter.write(&quot;[&quot;);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            for (int i = 0; i &lt; loggingEventList.size(); i++) {</span>
+<span class="fc" id="L72">                LoggingEvent event = loggingEventList.get(i);</span>
+<span class="fc" id="L73">                String jsonLog = layout.format(event);</span>
+<span class="fc" id="L74">                fileWriter.write(jsonLog);</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">                if (i &lt; loggingEventList.size() - 1) {</span>
+<span class="fc" id="L76">                    fileWriter.write(&quot;,&quot;);</span>
+                }
+<span class="fc" id="L78">                fileWriter.write(System.lineSeparator());</span>
+            }
+<span class="fc" id="L80">            fileWriter.write(&quot;]&quot;);</span>
+<span class="nc" id="L81">        } catch (IOException e) {</span>
+<span class="nc" id="L82">            e.printStackTrace();</span>
+<span class="fc" id="L83">        }</span>
+<span class="fc" id="L84">    }</span>
+    @Override
+<span class="nc" id="L86">    public void close() {}</span>
+    @Override
+<span class="fc" id="L88">    public boolean requiresLayout() {return false;}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

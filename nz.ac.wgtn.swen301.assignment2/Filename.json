@@ -1,0 +1,15 @@
+[{
+     "level": "DEBUG",
+     "name": "MemAppenderTest",
+     "thread": "main",
+     "message": "Debug message",
+     "timestamp": "2023-09-20T14:07:12.07Z"
+},
+{
+     "level": "INFO",
+     "name": "MemAppenderTest",
+     "thread": "main",
+     "message": "Information",
+     "timestamp": "2023-09-20T14:07:12.07Z"
+}
+]
